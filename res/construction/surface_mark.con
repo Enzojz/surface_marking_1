@@ -1,0 +1,192 @@
+local livetext = require "surface_mark/livetext"
+local coor = require "surface_mark/coor"
+local pipe = require "surface_mark/pipe"
+local func = require "surface_mark/func"
+local surface = require "surface_mark"
+local pi = math.pi
+
+-- local dump = require "luadump"
+local sizes = func.seqMap({1, 100}, function(v) return v * 0.1 end)
+local spacing = func.seqMap({0, 10}, function(v) return v * 0.1 end)
+local ratios = {{3, 1}, {2, 1}, {1, 1}, {1, 2}, {1, 3}, {1, 4}, {1, 5}, {1, 6}}
+local xOffsets = func.seqMap({-200, 200}, function(v) return v * 0.1 end)
+local tilts = func.seqMap({-100, 100}, function(v) return v * 0.01 end)
+local zOffsets = func.seqMap({-100, 100}, function(v) return v * 0.01 end)
+
+local fontList = {
+    "alte_din_1451_mittelschrift"
+}
+
+local colorList = {"CC0BAAF", "CC5AF1E"}
+
+
+local unpack = table.unpack
+local insert = table.insert
+
+local updateFn = function(params)
+    local result = {
+        models = {},
+        terrainAlignmentLists = {{type = "EQUAL", faces = {}}},
+        labelText = {},
+        slots = {}
+    }
+    
+    local fHeight = sizes[params.size + 1]
+    local fRatio = ratios[params.ratio + 1]
+    local spacing = spacing[params.lineSpacing + 1] * fHeight
+    local xOffset = xOffsets[params.xOffset + 1]
+    local zOffset = zOffsets[params.zOffset + 1]
+    local font = fontList[1]
+    local tilt = tilts[params.tilt + 1]
+    local color = colorList[params.color + 1]
+    
+    local unicode = {{}}
+    for _, m in ipairs(params.modules) do
+        if m.variant == 0x3B then
+            insert(unicode, {})
+        else
+            insert(unicode[#unicode], m.variant)
+        end
+    end
+    
+    if (#unicode[1] == 0) then
+        unicode[1] = surface.utf2unicode("#")
+    end
+    
+    local count = 0
+    for _, unicode in ipairs(unicode) do
+        if #unicode > 0 then
+            -- table.insert(result.models, {
+            --     id = "surface_mark/label.mdl",
+            --     transf = coor.scale(coor.xyz(fHeight, fWidth, 1)) * coor.trans(coor.xyz(count * (fHeight + spacing), xOffset, zOffset))
+            -- })
+            -- result.labelText[count] = {text}
+            local fn, width = livetext(fHeight, nil, font, color)(unicode)
+            for _, m in ipairs(fn(function() return 
+                coor.transX(-0.5 * width) 
+                * coor.rotX(-0.5 * pi) * coor.rotZ(0.5 * pi) 
+                * coor.scaleY(fRatio[1] / fRatio[2])
+                * coor.trans(coor.xyz(count * (fHeight + spacing), xOffset, 0))
+                * coor.rotY(math.atan(tilt))
+                * coor.transZ(zOffset) 
+            end)) do
+                table.insert(result.models, m)
+            end
+        
+        end
+        count = count + 1
+    end
+    
+    for slotId, m in pairs(params.modules) do
+        table.insert(result.slots,
+            {
+                id = slotId,
+                transf = m.transf,
+                type = "surface_data",
+                spacing = {2.5, 2.5, 2.5, 2.5}
+            }
+    )
+    end
+    
+    return result
+end
+
+local createTemplateFn = function(_)
+    return {}
+end
+
+local constructionTemplates =
+    {
+        {
+            constructionType = "STREET_CONSTRUCTION",
+            type = "DYNAMIC",
+            availability = {
+                yearFrom = 0,
+                yearTo = 0
+            },
+            description = {
+                name = _("MENU_NAME"),
+                description = _("MENU_DESC"),
+            },
+            data = {
+                params = {}
+            },
+        }
+    }
+
+function data()
+    
+    return {
+        type = "STREET_CONSTRUCTION",
+        description = {
+            name = _("MENU_NAME"),
+            description = _("MENU_DESC")
+        },
+        availability = {
+            yearFrom = 0,
+            yearTo = 0
+        },
+        skipCollision = true,
+        order = 1000,
+        constructionTemplates = constructionTemplates,
+        createTemplateFn = createTemplateFn,
+        params = {
+            {
+                key = "size",
+                name = _("MENU_FONT_SIZE"),
+                values = func.map(sizes, tostring),
+                uiType = "SLIDER",
+                defaultIndex = 10
+            },
+            -- {
+            --     key = "font",
+            --     name = _("MENU_FONT"),
+            --     values = fontList,
+            --     uiType = "COMBOBOX",
+            --     defaultIndex = 0
+            -- },
+            {
+                key = "color",
+                name = _("MENU_COLOR"),
+                values = {_("MENU_WHITE"), _("MENU_YELLOW")},
+                defaultIndex = 0
+            },
+            {
+                key = "ratio",
+                name = _("MENU_FONT_RATION"),
+                values = func.map(ratios, function(ratio) return string.format("%d:%d", ratio[1], ratio[2]) end),
+                -- uiType = "COMBOBOX",
+                defaultIndex = 2
+            },
+            {
+                key = "lineSpacing",
+                name = _("MENU_LINE_SPACING"),
+                values = func.map(spacing, function(spacing) return string.format("%d%%", spacing * 100) end),
+                uiType = "COMBOBOX",
+                defaultIndex = 0
+            },
+            {
+                key = "xOffset",
+                name = _("MENU_X_OFFSET"),
+                values = func.map(xOffsets, tostring),
+                uiType = "SLIDER",
+                defaultIndex = 200
+            },
+            {
+                key = "tilt",
+                name = _("MENU_TITL"),
+                values = func.map(tilts, function(tilt) return string.format("%d%%", tilt * 100) end),
+                uiType = "SLIDER",
+                defaultIndex = 100
+            },
+            {
+                key = "zOffset",
+                name = _("MENU_Z_OFFSET"),
+                values = func.map(zOffsets, tostring),
+                uiType = "SLIDER",
+                defaultIndex = 100
+            }
+        },
+        updateFn = updateFn,
+    }
+end

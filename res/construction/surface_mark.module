@@ -1,0 +1,33 @@
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+		visible = false,
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = "HIDDEN_MODULE",
+            description = "NOTHING",
+        },
+        category = {
+            categories = {},
+        },
+        type = "surface_data",
+        order = {
+            value = 260,
+        },
+        metadata = {},
+        
+        updateFn = function(result, transform, tag, slotId, addModelFn, params)
+        end,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end

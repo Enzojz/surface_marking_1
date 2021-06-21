@@ -1,0 +1,60 @@
+function data()
+    return {
+        boundingInfo = {
+            bbMax = { 3.2503168582916, 1.4219369888306, 3.2145841121674, },
+            bbMin = { -3.2676060199738, -1.2628409862518, 0, },
+        },
+        collider = {
+            params = { },
+            transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+            type = "MESH",
+        },
+        lods = {
+            {
+                node = {
+                    children = {
+                        {
+                            materials = {
+                              "livetext/CFFC0BAAF.mtl"
+                            },
+                            mesh = "livetext/alte_din_1451_mittelschrift/35.msh",
+                            name = "35",
+                            transf = { 0, 1.1, 0, 0, 0, 0, -1.1, 0, -1.1, 0, 0, 0, 0, -4.26125, 0.2, 1 }
+                        },
+                    },
+                    transf = { 
+                        1, 0, 0, 0, 
+                        0, 1, 0, 0, 
+                        0, 0, 1, 0, 
+                        0, 0, 0, 1, 
+                    },
+                },
+                static = false,
+                visibleFrom = 0,
+                visibleTo = 980,
+            },
+        },
+        metadata = {
+            availability = {
+                yearFrom = 0,
+                yearTo = 0,
+            },
+            cost = {
+                price = 2000,
+            },
+            description = {
+                name = _("MENU_NAME"),
+                description = _("MENU_DESC"),
+                icon = "ui/construction/surface_mark.tga",
+            },
+            signal = {
+                type = "WAYPOINT",
+            },
+            streetTerminal = {
+                cargo = false,
+            },
+        },
+        version = 1,
+    }
+    end
+    
