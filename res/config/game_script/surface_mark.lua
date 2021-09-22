@@ -107,7 +107,7 @@ local script = {
     guiHandleEvent = function(id, name, param)
         if id == "mainView" and name == "select" then
             local entity = game.interface.getEntity(param)
-            if (entity.fileName == "surface_mark.con") then
+            if (entity and entity.fileName == "surface_mark.con") then
                 local ew = api.gui.util.getById("temp.view.entity_" .. param)
                 local w = api.gui.util.getById("surface_mark.entity_" .. param)
                 if ew then
